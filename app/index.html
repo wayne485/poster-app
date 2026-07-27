@@ -1436,9 +1436,10 @@ function drawText(ctx, W, H) {
     const strokeW = Math.max(3, size * 0.06);
     ctx.lineWidth = strokeW;
     ctx.strokeStyle = strokeColor;
-    ctx.strokeText(headline, W / 2, y);
+    const drawX = centeredX(ctx, headline, W);
+    ctx.strokeText(headline, drawX, y);
     ctx.fillStyle = fillColor;
-    ctx.fillText(headline, W / 2, y);
+    ctx.fillText(headline, drawX, y);
   }
 
   if (subtitle) {
@@ -1454,10 +1455,31 @@ function drawText(ctx, W, H) {
     const strokeW = Math.max(2, size * 0.06);
     ctx.lineWidth = strokeW;
     ctx.strokeStyle = strokeColor;
-    ctx.strokeText(subtitle, W / 2, y);
+    const drawX = centeredX(ctx, subtitle, W);
+    ctx.strokeText(subtitle, drawX, y);
     ctx.fillStyle = fillColor;
-    ctx.fillText(subtitle, W / 2, y);
+    ctx.fillText(subtitle, drawX, y);
   }
+}
+
+// Canvas's textAlign:'center' centers text by its font advance-width, not by
+// what's actually visible. Bold display fonts have uneven left/right side
+// bearing per letter (e.g. "C" vs "S"), so the same advance-centered string
+// can look visibly off-center depending on which letters it starts/ends
+// with. This measures the real rendered ink (actualBoundingBoxLeft/Right)
+// and nudges the draw position so the ink itself sits centered on W,
+// regardless of font or the specific letters in the name typed in.
+// ctx.font must already be set to the final size before calling this.
+function centeredX(ctx, text, W) {
+  const prevAlign = ctx.textAlign;
+  ctx.textAlign = 'center';
+  const m = ctx.measureText(text);
+  ctx.textAlign = prevAlign;
+  const left = m.actualBoundingBoxLeft;
+  const right = m.actualBoundingBoxRight;
+  if (!isFinite(left) || !isFinite(right)) return W / 2; // fallback if unsupported
+  const inkOffset = (right - left) / 2;
+  return W / 2 - inkOffset;
 }
 
 // ═══════════════════════════════════════════════════════
