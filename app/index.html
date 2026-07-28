@@ -24,6 +24,14 @@
   src="https://www.facebook.com/tr?id=637987729349426&ev=PageView&noscript=1"
 /></noscript>
 <!-- End Meta Pixel Code -->
+<!-- Microsoft Clarity -->
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xtpl6hfv49");
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -1436,10 +1444,9 @@ function drawText(ctx, W, H) {
     const strokeW = Math.max(3, size * 0.06);
     ctx.lineWidth = strokeW;
     ctx.strokeStyle = strokeColor;
-    const drawX = centeredX(ctx, headline, W);
-    ctx.strokeText(headline, drawX, y);
+    ctx.strokeText(headline, W / 2, y);
     ctx.fillStyle = fillColor;
-    ctx.fillText(headline, drawX, y);
+    ctx.fillText(headline, W / 2, y);
   }
 
   if (subtitle) {
@@ -1455,31 +1462,10 @@ function drawText(ctx, W, H) {
     const strokeW = Math.max(2, size * 0.06);
     ctx.lineWidth = strokeW;
     ctx.strokeStyle = strokeColor;
-    const drawX = centeredX(ctx, subtitle, W);
-    ctx.strokeText(subtitle, drawX, y);
+    ctx.strokeText(subtitle, W / 2, y);
     ctx.fillStyle = fillColor;
-    ctx.fillText(subtitle, drawX, y);
+    ctx.fillText(subtitle, W / 2, y);
   }
-}
-
-// Canvas's textAlign:'center' centers text by its font advance-width, not by
-// what's actually visible. Bold display fonts have uneven left/right side
-// bearing per letter (e.g. "C" vs "S"), so the same advance-centered string
-// can look visibly off-center depending on which letters it starts/ends
-// with. This measures the real rendered ink (actualBoundingBoxLeft/Right)
-// and nudges the draw position so the ink itself sits centered on W,
-// regardless of font or the specific letters in the name typed in.
-// ctx.font must already be set to the final size before calling this.
-function centeredX(ctx, text, W) {
-  const prevAlign = ctx.textAlign;
-  ctx.textAlign = 'center';
-  const m = ctx.measureText(text);
-  ctx.textAlign = prevAlign;
-  const left = m.actualBoundingBoxLeft;
-  const right = m.actualBoundingBoxRight;
-  if (!isFinite(left) || !isFinite(right)) return W / 2; // fallback if unsupported
-  const inkOffset = (right - left) / 2;
-  return W / 2 - inkOffset;
 }
 
 // ═══════════════════════════════════════════════════════
